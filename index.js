@@ -10,7 +10,6 @@ app.use(express.json());
 
 // foodCirlceDb
 // mjTrgEOU7rRn0jGc
-
 const uri =
   "mongodb+srv://foodCirlceDb:mjTrgEOU7rRn0jGc@cluster0.uvhdimh.mongodb.net/?appName=Cluster0";
 
@@ -31,11 +30,49 @@ async function run() {
     await client.connect();
 
     const db = client.db("foodCircle_db");
+    const usersCollection = db.collection("users");
     const foodsCollection = db.collection("foods");
+    const foodsRequestCollection = db.collection("foodsRequest");
+
+    // Users realted apis
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      const email = req.body.email;
+      const query = { email: email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        res.send({
+          message: "User already exist. do not need to insert again",
+        });
+      } else {
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
+
+    app.get("/users", async (req, res) => {});
 
     // Foods related apis
     app.get("/foods", async (req, res) => {
-      const cursor = foodsCollection.find();
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.email = email;
+      }
+      const cursor = foodsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Sort foods
+    app.get("/featured-foods", async (req, res) => {
+      const projectFields = { name: 1 };
+      // foodQuantity
+      const cursor = foodsCollection
+        .find()
+        .sort({ price: -1 })
+        .limit(3)
+        .project(projectFields);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -71,6 +108,24 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await foodsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // FoodsRequest realted apis
+    app.get("/foods-request", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.email = email;
+      }
+      const cursor = foodsRequestCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post("/foods-request", async (req, res) => {
+      const newFoodReaquest = req.body;
+      const result = await foodsRequestCollection.insertOne(newFoodReaquest);
       res.send(result);
     });
 
