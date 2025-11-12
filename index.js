@@ -55,9 +55,11 @@ async function run() {
     // Foods related apis
     app.get("/foods", async (req, res) => {
       const email = req.query.email;
+      console.log(email);
+
       const query = {};
       if (email) {
-        query.email = email;
+        query.donatorEmail = email;
       }
       const cursor = foodsCollection.find(query);
       const result = await cursor.toArray();
@@ -66,13 +68,9 @@ async function run() {
 
     // Sort foods
     app.get("/featured-foods", async (req, res) => {
-      const projectFields = { name: 1 };
-      // foodQuantity
-      const cursor = foodsCollection
-        .find()
-        .sort({ price: -1 })
-        .limit(3)
-        .project(projectFields);
+      // const projectFields = { name: 1 };
+      // .project(projectFields);
+      const cursor = foodsCollection.find().sort({ foodQuantity: -1 }).limit(6);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -102,6 +100,24 @@ async function run() {
       };
       const result = await foodsCollection.updateOne(query, update);
       res.send(result);
+    });
+
+    app.put("/foods/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedFood = req.body;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: updatedFood,
+        };
+        const result = await foodsCollection.updateOne(filter, updateDoc);
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error("Error updating food:", error);
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to update food" });
+      }
     });
 
     app.delete("/foods/:id", async (req, res) => {
