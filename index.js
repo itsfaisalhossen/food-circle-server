@@ -8,10 +8,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// foodCirlceDb
-// mjTrgEOU7rRn0jGc
-const uri =
-  "mongodb+srv://foodCirlceDb:mjTrgEOU7rRn0jGc@cluster0.uvhdimh.mongodb.net/?appName=Cluster0";
+const uri = `mongodb+srv://foodCirlceDb:mjTrgEOU7rRn0jGc@cluster0.uvhdimh.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   serverApi: {
