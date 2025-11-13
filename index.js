@@ -55,7 +55,6 @@ async function run() {
     app.get("/foods", async (req, res) => {
       const email = req.query.email;
       console.log(email);
-
       const query = {};
       if (email) {
         query.donatorEmail = email;
@@ -133,6 +132,14 @@ async function run() {
       if (email) {
         query.email = email;
       }
+      const cursor = foodsRequestCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/foods-requests/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { foodId: id };
       const cursor = foodsRequestCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
