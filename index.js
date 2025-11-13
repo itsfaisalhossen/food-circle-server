@@ -25,14 +25,13 @@ app.get("/", (req, res) => {
 
 async function run() {
   try {
-    await client.connect();
-
+    // await client.connect();
     const db = client.db("foodCircle_db");
     const usersCollection = db.collection("users");
     const foodsCollection = db.collection("foods");
     const foodsRequestCollection = db.collection("foodsRequest");
 
-    // Users realted apis
+    // ************* Users realted apis **************
     app.post("/users", async (req, res) => {
       const newUser = req.body;
       const email = req.body.email;
@@ -50,10 +49,9 @@ async function run() {
 
     app.get("/users", async (req, res) => {});
 
-    // Foods related apis
+    // ************ Foods related apis ***********
     app.get("/foods", async (req, res) => {
       const email = req.query.email;
-      console.log(email);
       const query = {};
       if (email) {
         query.donatorEmail = email;
@@ -85,20 +83,6 @@ async function run() {
       res.send(result);
     });
 
-    // app.patch("/foods/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const updatedFood = req.body;
-    //   const query = { _id: new ObjectId(id) };
-    //   const update = {
-    //     $set: {
-    //       name: updatedFood.name,
-    //       price: updatedFood.price,
-    //     },
-    //   };
-    //   const result = await foodsCollection.updateOne(query, update);
-    //   res.send(result);
-    // });
-
     app.put("/foods/:id", async (req, res) => {
       try {
         const id = req.params.id;
@@ -124,7 +108,7 @@ async function run() {
       res.send(result);
     });
 
-    // FoodsRequest realted apis
+    // ************ FoodsRequest realted apis ****************
     app.get("/foods-request", async (req, res) => {
       const email = req.query.email;
       const query = {};
@@ -146,8 +130,8 @@ async function run() {
 
     app.patch("/foods-request/:id/status", async (req, res) => {
       try {
-        const id = req.params.id; // this is the _id of the request document
-        const { status } = req.body; // new status from client, e.g. "Approved"
+        const id = req.params.id;
+        const { status } = req.body;
         if (!status) {
           return res
             .status(400)
@@ -185,7 +169,7 @@ async function run() {
       res.send(result);
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
