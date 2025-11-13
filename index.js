@@ -10,7 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uvhdimh.mongodb.net/?appName=Cluster0`;
-console.log(process.env.DB_USER);
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -86,19 +85,19 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/foods/:id", async (req, res) => {
-      const id = req.params.id;
-      const updatedFood = req.body;
-      const query = { _id: new ObjectId(id) };
-      const update = {
-        $set: {
-          name: updatedFood.name,
-          price: updatedFood.price,
-        },
-      };
-      const result = await foodsCollection.updateOne(query, update);
-      res.send(result);
-    });
+    // app.patch("/foods/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const updatedFood = req.body;
+    //   const query = { _id: new ObjectId(id) };
+    //   const update = {
+    //     $set: {
+    //       name: updatedFood.name,
+    //       price: updatedFood.price,
+    //     },
+    //   };
+    //   const result = await foodsCollection.updateOne(query, update);
+    //   res.send(result);
+    // });
 
     app.put("/foods/:id", async (req, res) => {
       try {
@@ -143,6 +142,41 @@ async function run() {
       const cursor = foodsRequestCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
+    });
+
+    app.patch("/foods-request/:id/status", async (req, res) => {
+      try {
+        const id = req.params.id; // this is the _id of the request document
+        const { status } = req.body; // new status from client, e.g. "Approved"
+        if (!status) {
+          return res
+            .status(400)
+            .send({ error: true, message: "Status is required" });
+        }
+        const query = { _id: new ObjectId(id) };
+        const update = {
+          $set: {
+            status: status,
+          },
+        };
+        const result = await foodsRequestCollection.updateOne(query, update);
+        if (result.matchedCount === 0) {
+          return res
+            .status(404)
+            .send({ error: true, message: "Request not found" });
+        }
+        res.send({
+          success: true,
+          message: "Status updated successfully",
+          result,
+        });
+      } catch (error) {
+        console.error("Error updating status:", error);
+        res.status(500).send({
+          error: true,
+          message: "Internal server error",
+        });
+      }
     });
 
     app.post("/foods-request", async (req, res) => {
