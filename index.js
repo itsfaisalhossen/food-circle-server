@@ -109,14 +109,28 @@ async function run() {
     });
 
     // ************ FoodsRequest realted apis ****************
+
+    app.get("/foods-request", async (req, res) => {
+      try {
+        const email = req.query.email;
+        console.log(email);
+        const query = {};
+        if (email) {
+          query["requestPepoleInfo.email"] = email;
+        }
+        const cursor = foodsRequestCollection.find(query);
+        const result = await cursor.toArray();
+        res.status(200).json(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+      }
+    });
+
     app.get("/foods-request", async (req, res) => {
       const email = req.query.email;
-      const query = {};
-      if (email) {
-        query.email = email;
-      }
-      const cursor = foodsRequestCollection.find(query);
-      const result = await cursor.toArray();
+      const query = email ? { email } : {};
+      const result = await foodsRequestCollection.find(query).toArray();
       res.send(result);
     });
 
