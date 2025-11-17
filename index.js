@@ -56,15 +56,22 @@ async function run() {
       if (email) {
         query.donatorEmail = email;
       }
-      const cursor = foodsCollection.find(query);
+      const projectFields = {
+        aditionalNote: 0,
+        location: 0,
+        date: 0,
+        donatorPhotoUrl: 0,
+      };
+      const cursor = foodsCollection
+        .find(query)
+        .sort({ foodQuantity: -1 })
+        .project(projectFields);
       const result = await cursor.toArray();
       res.send(result);
     });
 
     // Sort foods
     app.get("/featured-foods", async (req, res) => {
-      // const projectFields = { name: 1 };
-      // .project(projectFields);
       const cursor = foodsCollection.find().sort({ foodQuantity: -1 }).limit(6);
       const result = await cursor.toArray();
       res.send(result);
@@ -109,7 +116,6 @@ async function run() {
     });
 
     // ************ FoodsRequest realted apis ****************
-
     app.get("/foods-request", async (req, res) => {
       try {
         const email = req.query.email;
